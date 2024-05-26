@@ -458,3 +458,111 @@
   ]
 }
 ```
+
+## Jabatan
+
+**POST /jabatan**
+
+- Request Body
+
+```json
+{
+  "nama_jabatan": "Manager Production",
+  "gapok": 18000000,
+  "tunjangan": 4000000,
+  "uang_makan": 1500000
+}
+```
+
+**PUT /jabatan**
+
+- Request Body
+
+```json
+{
+  "nama_jabatan": "Manager Production", // optional
+  "gapok": 18000000, // optional
+  "tunjangan": 4000000, // optional
+  "uang_makan": 1500000 // optional
+}
+```
+
+**GET /jabatan**
+
+- Request Body
+
+```json
+{
+  "code": 200,
+  "status": "success",
+  "data": [
+    {
+      "id": 1,
+      "nama_jabatan": "Manager Production",
+      "gapok": 18000000,
+      "tunjangan": 4000000,
+      "uang_makan": 1500000,
+      "updated_at": "",
+      "created_at": ""
+    }
+  ]
+}
+```
+
+**GET /jabatan/:id**
+
+- Request Body
+
+```json
+{
+  "code": 200,
+  "status": "success",
+  "data": {
+    "id": 1,
+    "nama_jabatan": "Manager Production",
+    "gapok": 18000000,
+    "tunjangan": 4000000,
+    "uang_makan": 1500000,
+    "updated_at": "",
+    "created_at": ""
+  }
+}
+```
+
+## Employee
+
+**POST /employee**
+
+- Request Body
+
+```json
+{
+  "nik": 01201212012,
+  "nama": "Aldi Sange",
+  "taggal_lahir": "07-06-2001",
+  "tempat_lahir": "Sukabumi",
+  "jenis_kelamin": "laki-laki",
+  "agama": "Islam",
+  "alamat": "Jalan Buntu No.69",
+  "tanggal_bergabung": "07-06-2024",
+  "jabatan_id": 1,
+  "email": "aldi@gmail.com",
+  "no_tlpn": "0812121212"
+}
+```
+
+## SlipGaji
+
+**POST /slip_gaji**
+
+- Request Body
+
+```json
+{
+  "periode_tahun": "2024",
+  "periode_bulan": "juni",
+  "employee_id": 1,
+  "potongan": 0,
+  "kasbon": 0
+}
+```
