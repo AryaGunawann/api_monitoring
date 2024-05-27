@@ -474,6 +474,24 @@
 }
 ```
 
+- Reponse (Succes 201)
+
+```json
+{
+  "code": 201,
+  "status": "created",
+  "data": {
+    "id": 1,
+    "nama_jabatan": "Manager Production",
+    "gapok": 18000000,
+    "tunjangan": 4000000,
+    "uang_makan": 1500000,
+    "created_at": "2024-06-07T00:00:00.000Z",
+    "updated_at": "2024-06-07T00:00:00.000Z"
+  }
+}
+```
+
 **PUT /jabatan**
 
 - Request Body
@@ -484,6 +502,24 @@
   "gapok": 18000000, // optional
   "tunjangan": 4000000, // optional
   "uang_makan": 1500000 // optional
+}
+```
+
+- Response (Succes 200 )
+
+```json
+{
+  "code": 200,
+  "status": "success",
+  "data": {
+    "id": 1,
+    "nama_jabatan": "Manager Production",
+    "gapok": 18000000,
+    "tunjangan": 4000000,
+    "uang_makan": 1500000,
+    "created_at": "2024-06-07T00:00:00.000Z",
+    "updated_at": "2024-06-07T00:00:00.000Z"
+  }
 }
 ```
 

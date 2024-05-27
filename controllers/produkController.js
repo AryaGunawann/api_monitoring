@@ -1,4 +1,6 @@
 const Produk = require("../models/produk");
+const Material = require("../models/material");
+const Riwayat = require("../models/riwayat");
 
 // Mendapatkan semua produk
 const getAllProduk = async (req, res) => {
@@ -26,7 +28,6 @@ const getProdukById = async (req, res) => {
   }
 };
 
-// Membuat produk baru
 const createProduk = async (req, res) => {
   try {
     const { nama, berat, jumlah_total, material_pendukung } = req.body;
@@ -34,8 +35,22 @@ const createProduk = async (req, res) => {
       nama,
       berat,
       jumlah_total,
-      material_pendukung,
     });
+
+    if (material_pendukung && material_pendukung.length > 0) {
+      const materials = await Material.findAll({
+        where: {
+          id: material_pendukung.map((m) => m.id),
+        },
+      });
+      await produk.addMaterial_pendukung(materials);
+    }
+
+    await Riwayat.create({
+      deskripsi: `Produk ${nama} ditambahkan dengan berat ${berat} dan jumlah total ${jumlah_total}.`,
+      jenis: "Produk Bertambah",
+    });
+
     res.status(201).json(produk);
   } catch (err) {
     console.error(err.message);
@@ -47,15 +62,36 @@ const createProduk = async (req, res) => {
 const updateProduk = async (req, res) => {
   try {
     const { id } = req.params;
-    const { nama, berat } = req.body;
+    const { nama, berat, material_pendukung } = req.body;
+
     const produk = await Produk.findByPk(id);
     if (!produk) {
       return res.status(404).json({ message: "Produk not found" });
     }
+
+    // Update produk
     await produk.update({
       nama: nama || produk.nama,
       berat: berat || produk.berat,
     });
+
+    if (material_pendukung && Array.isArray(material_pendukung)) {
+      const materials = await Material.findAll({
+        where: {
+          id: material_pendukung,
+        },
+      });
+
+      // Set the association with material pendukung
+      await produk.setMaterials(materials);
+    }
+
+    // Log riwayat
+    await Riwayat.create({
+      deskripsi: `Produk ${produk.nama} diperbarui.`,
+      jenis: "Produk Diperbarui",
+    });
+
     res.json(produk);
   } catch (err) {
     console.error(err.message);
