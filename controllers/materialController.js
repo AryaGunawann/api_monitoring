@@ -4,8 +4,8 @@ const Riwayat = require("../models/riwayat");
 // Mendapatkan semua material
 const getAllMaterial = async (req, res) => {
   try {
-    const material = await Material.findAll();
-    res.json(material);
+    const materials = await Material.findAll();
+    res.json(materials);
   } catch (err) {
     console.error(err.message);
     res.status(500).send("Server Error");

@@ -19,7 +19,7 @@ const Produk = db.define("Produk", {
 });
 
 Produk.belongsToMany(Material, {
-  through: "ProdukMaterial",
+  through: "MaterialProduk",
   as: "material_pendukung",
 });
 

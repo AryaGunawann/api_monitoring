@@ -12,7 +12,6 @@ const getAllProduk = async (req, res) => {
     res.status(500).send("Server Error");
   }
 };
-
 // Mendapatkan produk berdasarkan ID
 const getProdukById = async (req, res) => {
   try {
@@ -31,21 +30,48 @@ const getProdukById = async (req, res) => {
 const createProduk = async (req, res) => {
   try {
     const { nama, berat, jumlah_total, material_pendukung } = req.body;
+
+    // Hitung total material yang dibutuhkan
+    const totalMaterialDibutuhkan = material_pendukung.reduce(
+      (acc, cur) => acc + cur.jumlah,
+      0
+    );
+
+    // Cek apakah jumlah material yang tersedia cukup
+    const materialYangTersedia = await Material.findAll({
+      where: {
+        id: material_pendukung.map((m) => m.id),
+      },
+    });
+    const totalMaterialTersedia = materialYangTersedia.reduce(
+      (acc, cur) => acc + cur.jumlah,
+      0
+    );
+
+    if (totalMaterialTersedia < totalMaterialDibutuhkan) {
+      return res.status(400).json({ message: "Material tersebut kurang" });
+    }
+
+    // Buat produk jika material cukup
     const produk = await Produk.create({
       nama,
       berat,
       jumlah_total,
     });
 
-    if (material_pendukung && material_pendukung.length > 0) {
-      const materials = await Material.findAll({
-        where: {
-          id: material_pendukung.map((m) => m.id),
-        },
+    // Tambahkan material pendukung ke produk
+    await produk.addMaterial_pendukung(materialYangTersedia);
+
+    // Kurangi jumlah material yang digunakan
+    for (const material of materialYangTersedia) {
+      await material.update({
+        jumlah:
+          material.jumlah -
+          material_pendukung.find((m) => m.id === material.id).jumlah,
       });
-      await produk.addMaterial_pendukung(materials);
     }
 
+    // Tambahkan riwayat pembuatan produk
     await Riwayat.create({
       deskripsi: `Produk ${nama} ditambahkan dengan berat ${berat} dan jumlah total ${jumlah_total}.`,
       jenis: "Produk Bertambah",
