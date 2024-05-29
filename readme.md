@@ -602,3 +602,33 @@
   "kasbon": 0
 }
 ```
+
+## totalproduk
+
+**POST /totalproduk**
+
+- Request Body
+
+```json
+{
+  "nama": "Plat KWH",
+  "jumlah_total": 100,
+  "updated_at": "",
+  "created_at": ""
+}
+```
+
+## Pengemasan
+
+**get /pengemasan**
+
+- Request Body
+
+```json
+{
+  "id": 1,
+  "nama_produk": "Plat KWH",
+  "jumlah_kemasan": 50,
+  "created_at": "2024-05-29T12:00:00Z"
+}
+```

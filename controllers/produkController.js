@@ -1,6 +1,9 @@
 const Produk = require("../models/produk");
 const Material = require("../models/material");
 const Riwayat = require("../models/riwayat");
+const {
+  updateOrCreateTotalProduk,
+} = require("../controllers/totalProdukController");
 
 // Mendapatkan semua produk
 const getAllProduk = async (req, res) => {
@@ -61,6 +64,8 @@ const createProduk = async (req, res) => {
 
     // Tambahkan material pendukung ke produk
     await produk.addMaterial_pendukung(materialYangTersedia);
+
+    await updateOrCreateTotalProduk();
 
     // Kurangi jumlah material yang digunakan
     for (const material of materialYangTersedia) {

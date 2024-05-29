@@ -6,17 +6,20 @@ const Riwayat = require("./models/riwayat");
 const Jabatan = require("./models/jabatan");
 const SlipGaji = require("./models/slipGaji");
 const Employee = require("./models/employee");
+const TotalProduk = require("./models/totalProduk");
 
 // Fungsi untuk menyinkronkan model-model dengan database
 const syncModels = async () => {
   try {
     // Drop tables in reverse order of their dependencies
-    await SlipGaji.drop();
     await Employee.drop();
     await Jabatan.drop();
+    await SlipGaji.drop();
+
     await Riwayat.drop();
     await Produk.drop();
     await Material.drop();
+    await TotalProduk.drop();
 
     // Sync models again
     await db.sync({ force: true }); // force: true akan menghapus tabel yang sudah ada jika ada perubahan pada model
