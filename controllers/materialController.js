@@ -100,7 +100,6 @@ const deleteMaterial = async (req, res) => {
   }
 };
 
-// Menambahkan jumlah material
 const tambahJumlah = async (req, res) => {
   try {
     const { id } = req.params;

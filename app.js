@@ -1,6 +1,7 @@
 const express = require("express");
 const app = express();
 const db = require("./database");
+const cors = require("cors");
 
 // Menghubungkan ke database
 db.authenticate()
@@ -9,6 +10,7 @@ db.authenticate()
 
 // Middlewares
 app.use(express.json());
+app.use(cors());
 
 // Routes
 app.use("/produk", require("./routes/produkRoutes"));

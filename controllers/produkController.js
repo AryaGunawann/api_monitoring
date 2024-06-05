@@ -72,13 +72,13 @@ const createProduk = async (req, res) => {
       await material.update({
         jumlah:
           material.jumlah -
-          material_pendukung.find((m) => m.id === material.id).jumlah,
+          material_pendukung.find((mp) => mp.id === material.id).jumlah,
       });
     }
 
     // Tambahkan riwayat pembuatan produk
     await Riwayat.create({
-      deskripsi: `Produk ${nama} ditambahkan dengan berat ${berat} dan jumlah total ${jumlah_total}.`,
+      deskripsi: `Produk ${nama} Bertambah dengan jumlah total ${jumlah_total}.`,
       jenis: "Produk Bertambah",
     });
 
@@ -155,6 +155,12 @@ const tambahJumlah = async (req, res) => {
     if (!produk) {
       return res.status(404).json({ message: "Produk not found" });
     }
+
+    await Riwayat.create({
+      deskripsi: `Jumlah Produk ${produk.nama} ditambahkan sebanyak ${produk.jumlah_total}.`,
+      jenis: "Produk Bertambah",
+    });
+
     produk.jumlah_total += jumlah;
     await produk.save();
     res.json(produk);
@@ -176,6 +182,12 @@ const kurangiJumlah = async (req, res) => {
     if (produk.jumlah_total < jumlah) {
       return res.status(400).json({ message: "Not enough products" });
     }
+
+    await Riwayat.create({
+      deskripsi: `Jumlah Produk ${produk.nama} dikurangi sebanyak ${produk.jumlah_total}`,
+      jenis: "Produk Berkurang",
+    });
+
     produk.jumlah_total -= jumlah;
     await produk.save();
     res.json(produk);

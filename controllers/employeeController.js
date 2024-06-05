@@ -35,6 +35,28 @@ const getEmployeeById = async (req, res) => {
   }
 };
 
+// Mendapatkan employee berdasarkan NIK
+const getEmployeeByNik = async (req, res) => {
+  try {
+    const { nik } = req.params;
+    const employee = await Employee.findOne({
+      where: { nik },
+      include: Jabatan,
+    });
+    if (!employee) {
+      return res.status(404).json({ message: "Employee not found" });
+    }
+    res.status(200).json({
+      code: 200,
+      status: "success",
+      data: employee,
+    });
+  } catch (err) {
+    console.error(err.message);
+    res.status(500).send("Server Error");
+  }
+};
+
 // Membuat employee baru
 const createEmployee = async (req, res) => {
   try {
@@ -139,6 +161,7 @@ const deleteEmployee = async (req, res) => {
 module.exports = {
   getAllEmployees,
   getEmployeeById,
+  getEmployeeByNik,
   createEmployee,
   updateEmployee,
   deleteEmployee,

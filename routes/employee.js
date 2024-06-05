@@ -3,6 +3,7 @@ const router = express.Router();
 const {
   getAllEmployees,
   getEmployeeById,
+  getEmployeeByNik,
   createEmployee,
   updateEmployee,
   deleteEmployee,
@@ -10,6 +11,7 @@ const {
 
 router.get("/", getAllEmployees);
 router.get("/:id", getEmployeeById);
+router.get("/nik/:nik", getEmployeeByNik);
 router.post("/", createEmployee);
 router.put("/:id", updateEmployee);
 router.delete("/:id", deleteEmployee);
