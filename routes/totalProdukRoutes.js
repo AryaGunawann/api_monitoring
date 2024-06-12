@@ -6,6 +6,6 @@ const totalProdukController = require("../controllers/totalProdukController");
 router.get("/", totalProdukController.getAllTotalProduk);
 
 // Route untuk membuat total produk baru
-router.post("/", totalProdukController.updateOrCreateTotalProduk);
+router.post("/decrement", totalProdukController.decrementTotalProduk);
 
 module.exports = router;

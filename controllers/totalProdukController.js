@@ -19,10 +19,13 @@ exports.updateOrCreateTotalProduk = async () => {
 
     // Kelompokkan produk berdasarkan nama
     const produkGroups = allProduk.reduce((groups, produk) => {
-      if (!groups[produk.nama]) {
-        groups[produk.nama] = 0;
+      const nama = produk.nama || "";
+      const jumlah_total = produk.jumlah_total || 0;
+
+      if (!groups[nama]) {
+        groups[nama] = 0;
       }
-      groups[produk.nama] += produk.jumlah_total;
+      groups[nama] += jumlah_total;
       return groups;
     }, {});
 
@@ -39,5 +42,26 @@ exports.updateOrCreateTotalProduk = async () => {
   } catch (error) {
     console.error("Error updating or creating total produk:", error);
     throw new Error("Internal Server Error");
+  }
+};
+
+// Mengurangi jumlah total produk
+exports.decrementTotalProduk = async (req, res) => {
+  const { nama, jumlah } = req.body;
+
+  try {
+    const totalProduk = await TotalProduk.findOne({ where: { nama } });
+
+    if (totalProduk) {
+      const updatedJumlahTotal = totalProduk.jumlah_total - jumlah;
+      await totalProduk.update({ jumlah_total: updatedJumlahTotal });
+
+      res.json({ message: "Total produk updated successfully" });
+    } else {
+      res.status(404).json({ error: "Total produk not found" });
+    }
+  } catch (error) {
+    console.error("Error decrementing total produk:", error);
+    res.status(500).json({ error: "Internal Server Error" });
   }
 };

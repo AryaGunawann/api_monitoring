@@ -11,7 +11,9 @@ const Riwayat = db.define("Riwayat", {
       "Produk Bertambah",
       "Material Bertambah",
       "Produk Berkurang",
-      "Material Berkurang"
+      "Material Berkurang",
+      "Produk Dikemas",
+      "Produk Shipping"
     ),
     allowNull: false,
   },
