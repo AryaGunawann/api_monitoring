@@ -1,34 +1,40 @@
-// models/shipping.js
-const { DataTypes } = require("sequelize");
-const sequelize = require("../database");
+const { DataTypes, Model } = require("sequelize");
+const db = require("../database");
+const Packing = require("./packing");
 
-const Shipping = sequelize.define(
-  "Shipping",
+class Shipping extends Model {}
+
+Shipping.init(
   {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    nama: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     jumlah: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
     },
-    status: {
-      type: DataTypes.STRING,
+    tanggal_pengiriman: {
+      type: DataTypes.DATE,
       allowNull: false,
-      defaultValue: "Proses", // Default status ke "Proses"
+      defaultValue: DataTypes.NOW,
+    },
+    packingId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Packing,
+        key: "id",
+      },
+    },
+    status: {
+      type: DataTypes.ENUM("proses", "pending", "dikirim"),
+      defaultValue: "Proses",
     },
   },
   {
-    tableName: "shippings",
-    timestamps: true,
+    sequelize: db,
+    modelName: "Shipping",
   }
 );
+
+Shipping.belongsTo(Packing, { foreignKey: "packingId" });
+Packing.hasMany(Shipping, { foreignKey: "packingId" });
 
 module.exports = Shipping;

@@ -1,29 +1,35 @@
-// models/packing.js
-const { DataTypes } = require("sequelize");
-const sequelize = require("../database");
+const { DataTypes, Model } = require("sequelize");
+const db = require("../database");
+const Produk = require("./produk");
 
-const Packing = sequelize.define(
-  "Packing",
+class Packing extends Model {}
+
+Packing.init(
   {
-    id: {
-      type: DataTypes.INTEGER,
-      autoIncrement: true,
-      primaryKey: true,
-    },
-    nama: {
-      type: DataTypes.STRING,
-      allowNull: false,
-    },
     jumlah: {
       type: DataTypes.INTEGER,
       allowNull: false,
       defaultValue: 0,
     },
+    tanggal_packing: {
+      type: DataTypes.DATE,
+      allowNull: false,
+      defaultValue: DataTypes.NOW,
+    },
+    produkId: {
+      type: DataTypes.INTEGER,
+      references: {
+        model: Produk,
+        key: "id",
+      },
+    },
   },
   {
-    tableName: "packings",
-    timestamps: true,
+    sequelize: db,
+    modelName: "Packing",
   }
 );
+
+Packing.belongsTo(Produk, { foreignKey: "produkId" });
 
 module.exports = Packing;

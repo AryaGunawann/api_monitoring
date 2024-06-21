@@ -19,9 +19,7 @@ app.use("/riwayat", require("./routes/riwayatRoutes"));
 app.use("/jabatan", require("./routes/jabatan"));
 app.use("/employee", require("./routes/employee"));
 app.use("/slipgaji", require("./routes/slipGaji"));
-app.use("/total", require("./routes/totalProdukRoutes"));
 app.use("/packing", require("./routes/packing"));
-app.use("/totalpack", require("./routes/totalPackingRoutes"));
 app.use("/shipping", require("./routes/shipping"));
 
 const PORT = process.env.PORT || 2000;

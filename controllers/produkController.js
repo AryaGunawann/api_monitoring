@@ -65,8 +65,6 @@ const createProduk = async (req, res) => {
     // Tambahkan material pendukung ke produk
     await produk.addMaterial_pendukung(materialYangTersedia);
 
-    await updateOrCreateTotalProduk();
-
     // Kurangi jumlah material yang digunakan
     for (const material of materialYangTersedia) {
       await material.update({
@@ -150,22 +148,87 @@ const deleteProduk = async (req, res) => {
 const tambahJumlah = async (req, res) => {
   try {
     const { id } = req.params;
-    const { jumlah } = req.body;
+    const { jumlah, material_pendukung } = req.body;
+
+    // Pastikan material_pendukung memiliki nilai yang valid
+    if (
+      !material_pendukung ||
+      !Array.isArray(material_pendukung) ||
+      material_pendukung.length === 0
+    ) {
+      return res
+        .status(400)
+        .json({
+          message:
+            "Material pendukung harus berupa array yang tidak boleh kosong",
+        });
+    }
+
+    // Ambil produk berdasarkan ID
     const produk = await Produk.findByPk(id);
+
     if (!produk) {
       return res.status(404).json({ message: "Produk not found" });
     }
 
+    // Hitung total material yang dibutuhkan
+    const totalMaterialDibutuhkan = material_pendukung.reduce(
+      (acc, cur) => acc + cur.jumlah,
+      0
+    );
+
+    // Ambil semua material yang diperlukan berdasarkan ID
+    const materials = await Material.findAll({
+      where: {
+        id: material_pendukung.map((m) => m.id),
+      },
+    });
+
+    // Pastikan semua material ditemukan
+    if (materials.length !== material_pendukung.length) {
+      return res
+        .status(404)
+        .json({ message: "One or more materials not found" });
+    }
+
+    // Cek apakah jumlah material yang tersedia cukup
+    const totalMaterialTersedia = materials.reduce(
+      (acc, cur) => acc + cur.jumlah,
+      0
+    );
+
+    if (totalMaterialTersedia < totalMaterialDibutuhkan) {
+      return res.status(400).json({ message: "Material tersebut kurang" });
+    }
+
+    // Tambahkan jumlah ke produk yang ada
+    produk.jumlah_total += jumlah;
+    await produk.save();
+
+    // Kurangi jumlah material yang digunakan
+    for (const mat of material_pendukung) {
+      const material = materials.find((m) => m.id === mat.id);
+      if (material) {
+        // Kurangi jumlah material yang digunakan
+        await material.update({
+          jumlah: material.jumlah - mat.jumlah,
+        });
+      } else {
+        return res
+          .status(404)
+          .json({ message: `Material with ID '${mat.id}' not found` });
+      }
+    }
+
+    // Buat riwayat
     await Riwayat.create({
-      deskripsi: `Jumlah Produk ${produk.nama} ditambahkan sebanyak ${produk.jumlah_total}.`,
+      deskripsi: `Jumlah Produk ${produk.nama} ditambahkan sebanyak ${jumlah}.`,
       jenis: "Produk Bertambah",
     });
 
-    produk.jumlah_total += jumlah;
-    await produk.save();
     res.json(produk);
   } catch (err) {
-    console.error(err.message);
+    console.error("Error adding product quantity:", err);
     res.status(500).send("Server Error");
   }
 };

@@ -1,92 +1,168 @@
 const Shipping = require("../models/shipping");
-const TotalPacking = require("../models/totalPacking");
+const Packing = require("../models/packing");
+const Produk = require("../models/produk");
 
-exports.addShipping = async (req, res) => {
-  const { nama, jumlah } = req.body;
+// Controller untuk membuat shipping baru
+exports.createShipping = async (req, res) => {
+  const { packingId, jumlah } = req.body;
 
   try {
-    const totalPacking = await TotalPacking.findOne({ where: { nama } });
-
-    if (!totalPacking || totalPacking.jumlah_total < jumlah) {
-      return res.status(400).json({ error: "Jumlah packing tidak mencukupi" });
+    // Cek apakah packing dengan ID yang diberikan ada
+    const packing = await Packing.findByPk(packingId);
+    if (!packing) {
+      return res.status(404).json({ error: "Packing tidak ditemukan" });
     }
 
-    totalPacking.jumlah_total -= jumlah;
-    await totalPacking.save();
-
-    const shipping = await Shipping.create({ nama, jumlah, status: "Proses" });
-
-    res.status(201).json(shipping);
-  } catch (error) {
-    console.error("Error adding shipping:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-exports.getShipping = async (req, res) => {
-  try {
-    const shippings = await Shipping.findAll();
-    res.status(200).json(shippings);
-  } catch (error) {
-    console.error("Error getting shippings:", error);
-    res.status(500).json({ error: "Internal Server Error" });
-  }
-};
-
-// Memperbarui status pengiriman
-exports.updateShippingStatus = async (req, res) => {
-  const { id } = req.params;
-  const { status } = req.body;
-
-  try {
-    const shipping = await Shipping.findByPk(id);
-
-    if (!shipping) {
-      return res.status(404).json({ error: "Shipping not found" });
+    // Cek apakah jumlah packing mencukupi untuk shipping
+    if (packing.jumlah < jumlah) {
+      return res
+        .status(400)
+        .json({ error: "Jumlah packing tidak mencukupi untuk shipping" });
     }
 
-    shipping.status = status;
-    await shipping.save();
+    // Buat shipping baru
+    const shipping = await Shipping.create({
+      jumlah,
+      packingId: packing.id,
+      status: "Proses",
+    });
 
-    res.json(shipping);
+    // Kurangi jumlah packing
+    packing.jumlah -= jumlah;
+    await packing.save();
+
+    // Mengembalikan response sukses
+    return res.status(201).json(shipping);
   } catch (error) {
-    console.error("Error updating shipping status:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error creating shipping:", error);
+    return res.status(500).json({ error: "Gagal membuat shipping" });
   }
 };
 
+// Controller untuk mendapatkan semua data shipping
+exports.getAllShipping = async (req, res) => {
+  try {
+    const allShipping = await Shipping.findAll({
+      include: [
+        {
+          model: Packing,
+          include: [
+            {
+              model: Produk,
+              attributes: ["nama"],
+            },
+          ],
+        },
+      ],
+    });
+    res.json(allShipping);
+  } catch (error) {
+    console.error("Error getting all shipping:", error);
+    res.status(500).json({ error: "Gagal mendapatkan semua data shipping" });
+  }
+};
+
+// Controller untuk mendapatkan data shipping berdasarkan ID
 exports.getShippingById = async (req, res) => {
   const { id } = req.params;
 
   try {
-    const shipping = await Shipping.findByPk(id);
+    const shipping = await Shipping.findByPk(id, {
+      include: [
+        {
+          model: Packing,
+          include: [
+            {
+              model: Produk,
+              attributes: ["nama"],
+            },
+          ],
+        },
+      ],
+    });
 
     if (!shipping) {
       return res.status(404).json({ error: "Shipping tidak ditemukan" });
     }
 
-    res.status(200).json(shipping);
+    const result = {
+      ...shipping.toJSON(),
+      packingJumlah: shipping.Packing.jumlah,
+      produkNama: shipping.Packing.Produk.nama,
+    };
+
+    res.json(result);
   } catch (error) {
-    console.error("Error getting shipping by id:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    console.error("Error getting shipping by ID:", error);
+    res.status(500).json({ error: "Gagal mendapatkan data shipping" });
   }
 };
 
+// Controller untuk memperbarui data shipping
+exports.updateShipping = async (req, res) => {
+  const { id } = req.params;
+  const { jumlah } = req.body;
+
+  try {
+    const shipping = await Shipping.findByPk(id);
+    if (!shipping) {
+      return res.status(404).json({ error: "Shipping tidak ditemukan" });
+    }
+
+    await shipping.update({ jumlah });
+
+    res.json(shipping);
+  } catch (error) {
+    console.error("Error updating shipping:", error);
+    res.status(500).json({ error: "Gagal memperbarui data shipping" });
+  }
+};
+
+// Controller untuk menghapus shipping berdasarkan ID
 exports.deleteShipping = async (req, res) => {
   const { id } = req.params;
 
   try {
     const shipping = await Shipping.findByPk(id);
-
     if (!shipping) {
       return res.status(404).json({ error: "Shipping tidak ditemukan" });
     }
 
     await shipping.destroy();
 
-    res.status(200).json({ message: "Shipping berhasil dihapus" });
+    return res.status(204).send();
   } catch (error) {
     console.error("Error deleting shipping:", error);
-    res.status(500).json({ error: "Internal Server Error" });
+    return res.status(500).json({ error: "Gagal menghapus shipping" });
+  }
+};
+
+// Controller untuk memperbarui status shipping
+exports.updateShippingStatus = async (req, res) => {
+  const { id } = req.params;
+  const { status } = req.body;
+
+  try {
+    const shipping = await Shipping.findByPk(id);
+    if (!shipping) {
+      return res.status(404).json({ error: "Shipping tidak ditemukan" });
+    }
+
+    // Validasi status yang diperbolehkan
+    if (!["proses", "pending", "dikirim"].includes(status)) {
+      return res
+        .status(400)
+        .json({ error: "Status yang diberikan tidak valid" });
+    }
+
+    await shipping.update({ status });
+
+    // Dapatkan shipping yang diperbarui dari database
+    const updatedShipping = await Shipping.findByPk(id);
+
+    res.json(updatedShipping); // Mengembalikan shipping yang diperbarui
+  } catch (error) {
+    console.error("Error updating shipping status:", error);
+    res.status(500).json({ error: "Gagal memperbarui status shipping" });
   }
 };
