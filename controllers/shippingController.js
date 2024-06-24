@@ -149,7 +149,7 @@ exports.updateShippingStatus = async (req, res) => {
     }
 
     // Validasi status yang diperbolehkan
-    if (!["proses", "pending", "dikirim"].includes(status)) {
+    if (!["proses", "pending", "dikirim", "selesai"].includes(status)) {
       return res
         .status(400)
         .json({ error: "Status yang diberikan tidak valid" });

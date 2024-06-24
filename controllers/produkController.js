@@ -1,9 +1,6 @@
 const Produk = require("../models/produk");
 const Material = require("../models/material");
 const Riwayat = require("../models/riwayat");
-const {
-  updateOrCreateTotalProduk,
-} = require("../controllers/totalProdukController");
 
 // Mendapatkan semua produk
 const getAllProduk = async (req, res) => {
@@ -156,12 +153,10 @@ const tambahJumlah = async (req, res) => {
       !Array.isArray(material_pendukung) ||
       material_pendukung.length === 0
     ) {
-      return res
-        .status(400)
-        .json({
-          message:
-            "Material pendukung harus berupa array yang tidak boleh kosong",
-        });
+      return res.status(400).json({
+        message:
+          "Material pendukung harus berupa array yang tidak boleh kosong",
+      });
     }
 
     // Ambil produk berdasarkan ID

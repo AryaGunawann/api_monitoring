@@ -24,7 +24,7 @@ Shipping.init(
       },
     },
     status: {
-      type: DataTypes.ENUM("proses", "pending", "dikirim"),
+      type: DataTypes.ENUM("proses", "pending", "dikirim", "selesai"),
       defaultValue: "Proses",
     },
   },
